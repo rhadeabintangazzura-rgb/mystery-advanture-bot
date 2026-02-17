@@ -1,118 +1,81 @@
 import time
 import random
 
-# ==============================
-# VARIABEL GLOBAL
-# ==============================
-nyawa_awal = 100
-nyawa = nyawa_awal
-
-# ==============================
-# FUNGSI TAMPILAN TEKS
-# ==============================
-def dramatic_print(text):
-    print(text)
-    time.sleep(0.5)
-
-def slow_print(text, delay=0.03):
-    for char in text:
-        print(char, end='', flush=True)
+# helper to print with dramatic pause
+def print_slow(text: str, delay: float = 0.5):
+    """Print each line of `text` then wait `delay` seconds."""
+    for line in text.split("\n"):
+        print(line)
         time.sleep(delay)
-    print()
-    time.sleep(0.5)
 
-# ==============================
-# ASCII ART
-# ==============================
-pedang_ascii = r"""
-       />------------------------------------>
+
+# ascii art for outcomes
+def show_outcome(victory: bool):
+    if victory:
+        art = r"""
+          /| ________________
+O|===|* >________________>
+          \|
 """
+        print_slow(art, delay=0.1)
+        print_slow("Kamu berhasil! Pedang kemenangan muncul di tanganmu.")
+    else:
+        art = r"""
+             .-.
+            (o o)
+            | O \
+             \   \
+              `~~~' 
+        """
+        print_slow(art, delay=0.1)
+        print_slow("Sayang! Sebuah tengkorak muncul... Nyawamu berkurang.")
 
-tengkorak_ascii = r"""
-     _____
-   .-"     "-.
-  /           \
- |  X       X  |
- |     ___     |
-  \  (_____)  /
-   '-._____.-'
-"""
 
-# ==============================
-# SISTEM NYAWA
-# ==============================
-def kurangi_nyawa(jumlah):
-    global nyawa
-    nyawa -= jumlah
-    dramatic_print(f"\n⚠️ Kamu kehilangan {jumlah} nyawa!")
-    dramatic_print(f"❤️ Sisa nyawa: {nyawa}\n")
 
-    if nyawa <= 0:
-        dramatic_print("\n--- KAMU TUMBANG ---")
-        print(tengkorak_ascii)
-        dramatic_print("Simulasi berakhir.\n")
-        raise SystemExit
-
-# ==============================
-# ALUR GAME
-# ==============================
 def game_utama():
-    global nyawa
-    nyawa = nyawa_awal  # reset nyawa
-
-    dramatic_print("\n--- MEMULAI PETUALANGAN DIGITAL ---")
+    print("--- MEMULAI PETUALANGAN DIGITAL ---")
     nama = input("Siapa namamu? ")
+    nyawa = 100
+    print_slow(f"Selamat datang, {nama}! Nyawamu: {nyawa}")
+    time.sleep(1)
 
-    slow_print(f"\nSelamat datang, {nama}. Dunia Algoria sedang menunggumu...")
+    # loop permainan agar bisa diulang
+    while True:
+        print_slow("Di hadapanmu terbentang dua jalur misterius:")
+        print_slow("1. Lembah Coding - tempat di mana kode mengalir seperti sungai.")
+        print_slow("2. Gunung Bug - puncak penuh tantangan dan kesalahan tak terduga.")
+        pilihan = input("Pilih jalurmu (1 atau 2): ")
 
-    dramatic_print("\nKamu terbangun di sebuah ruangan bercahaya biru.")
-    dramatic_print("Di depanmu ada dua jalur holografis:")
-    dramatic_print("1. Jalur Pengetahuan — penuh simbol ungu berputar.")
-    dramatic_print("2. Jalur Keberanian — terdengar langkah aneh di dalamnya.")
-
-    pilihan = input("\nPilih jalur (1/2): ")
-
-    if pilihan == "1":
-        jalur_pengetahuan(nama)
-    elif pilihan == "2":
-        jalur_keberanian(nama)
-    else:
-        dramatic_print("Sistem mendeteksi pilihan yang buruk.")
-        kurangi_nyawa(20)
-
-# ==============================
-# JALUR 1
-# ==============================
-def jalur_pengetahuan(nama):
-    dramatic_print("\nKamu memasuki Jalur Pengetahuan...")
-    dramatic_print("Simbol holografis berputar mengelilingimu.")
-    dramatic_print("Sebuah buku digital melayang pelan.")
-
-    dramatic_print("\nApa yang kamu lakukan?")
-    dramatic_print("1. Sentuh buku itu.")
-    dramatic_print("2. Abaikan.")
-
-    pilih = input("Pilih (1/2): ")
-
-    if pilih == "1":
-        hasil = random.choice(["baik", "buruk"])  # elemen keberuntungan
-
-        if hasil == "baik":
-            dramatic_print("\nBuku itu bersinar terang!")
-            dramatic_print("Kamu mendapatkan pengetahuan rahasia Algoria!")
-            print(pedang_ascii)
-            dramatic_print("KEMENANGAN KECIL: Kamu memperoleh pedang data!")
+        if pilihan == '1':
+            print_slow("Kamu memasuki Lembah Coding. Baris demi baris kode menyapa.")
+            # keberuntungan: peluang 60% berhasil
+            if random.random() < 0.6:
+                show_outcome(True)
+            else:
+                nyawa -= 30
+                show_outcome(False)
+        elif pilihan == '2':
+            print_slow("Kamu menapaki Gunung Bug. Setiap langkah terasa seperti debugging.")
+            # jalur yang sulit, peluang menang 40%
+            if random.random() < 0.4:
+                show_outcome(True)
+            else:
+                nyawa -= 30
+                show_outcome(False)
         else:
-            dramatic_print("\nBuku itu tiba-tiba meledak menjadi cahaya!")
-            dramatic_print("Energi tak stabil mengenai tubuhmu.")
-            kurangi_nyawa(20)
+            nyawa -= 20
+            print_slow(f"Pilihan tidak dikenal! Nyawamu berkurang menjadi {nyawa}.")
 
-    elif pilih == "2":
-        dramatic_print("\nKamu berjalan melewati buku itu...")
-        dramatic_print("Tapi lantai holografis runtuh!")
-        kurangi_nyawa(20)
-    else:
-        dramatic_print("Pilihan tidak dikenali.")
-        kurangi_nyawa(20)
+        # cek nyawa
+        if nyawa <= 0:
+            print_slow("Nyawamu habis! Permainan berakhir.")
+            break
 
-# ======
+        # tanya ulang
+        lagi = input("Main lagi? (y/n): ").strip().lower()
+        if lagi != 'y':
+            print_slow("Terima kasih sudah bermain! Sampai jumpa.")
+            break
+    
+if __name__ == "__main__":
+    game_utama()
